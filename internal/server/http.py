@@ -7,13 +7,15 @@
 """
 from flask import Flask
 
+from config import Config
 from internal.router import Router
 
 
 class Http(Flask):
     """Http server engine"""
 
-    def __init__(self, *args, router: Router, **kwargs):
+    def __init__(self, *args, router: Router, config: Config, **kwargs):
         super().__init__(*args, **kwargs)
-        #  regist app router
+
         router.register_router(self)
+        self.config.from_object(config)

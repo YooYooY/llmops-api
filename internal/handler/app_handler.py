@@ -11,6 +11,8 @@ from typing import Any
 from flask import request
 from openai import OpenAI
 
+from internal.schema.app_schema import CompletionReq
+
 
 class AppHandler:
     """controller"""
@@ -20,6 +22,10 @@ class AppHandler:
 
     def completion(self):
         """chat interface"""
+        req = CompletionReq()
+        if not req.validate():
+            return req.errors
+        
         query = request.json.get("query")
 
         client = OpenAI(

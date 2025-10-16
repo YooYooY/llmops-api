@@ -8,13 +8,14 @@
 from dotenv import load_dotenv
 from injector import Injector
 
+from config import Config
 from internal.router import Router
 from internal.server import Http
 
 injector = Injector()
 load_dotenv()
 
-app = Http(__name__, router=injector.get(Router))
+app = Http(__name__, router=injector.get(Router), config=Config())
 
 if __name__ == "__main__":
     app.run(debug=True)
