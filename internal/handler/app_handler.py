@@ -11,6 +11,7 @@ from typing import Any
 from flask import request
 from openai import OpenAI
 
+from internal.exception import FailException
 from internal.schema.app_schema import CompletionReq
 from pkg.response import validate_error_json, success_json
 
@@ -19,7 +20,8 @@ class AppHandler:
     """controller"""
 
     def ping(self):
-        return {"ping": "pong2"}
+        # return {"ping": "pong2"}
+        raise FailException(message="异常")
 
     def completion(self):
         """chat interface"""

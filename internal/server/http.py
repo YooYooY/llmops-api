@@ -8,7 +8,9 @@
 from flask import Flask
 
 from config import Config
+from internal.exception import CustomException
 from internal.router import Router
+from pkg.response import Response, json, HttpCode
 
 
 class Http(Flask):
@@ -19,3 +21,15 @@ class Http(Flask):
 
         router.register_router(self)
         self.config.from_object(config)
+
+        self.register_error_handler(Exception, self._error_handle)
+
+    def _error_handle(self, error: Exception):
+        if isinstance(error, CustomException):
+            return json(Response(
+                code=error.code,
+                message=error.message,
+                data=error.data if error.data is not None else {}
+            ))
+
+        return json(Response(code=HttpCode.FAIL, message=str(error), data={}))
