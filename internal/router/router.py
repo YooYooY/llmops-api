@@ -27,6 +27,7 @@ class Router:
 
         # 2. binding the url in the controller
         bp.add_url_rule("/ping", view_func=self.app_handler.ping)
+        bp.add_url_rule("/check_database", view_func=self.app_handler.check_database)
         bp.add_url_rule("/app/completion", view_func=self.app_handler.completion, methods=["POST"])
 
         # 3. register the blueprint in the app

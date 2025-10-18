@@ -10,10 +10,12 @@ from typing import Any
 
 from flask import request
 from openai import OpenAI
+from sqlalchemy import text
 
 from internal.exception import FailException
+from internal.extension.database_extension import db
 from internal.schema.app_schema import CompletionReq
-from pkg.response import validate_error_json, success_json
+from pkg.response import validate_error_json, success_message, fail_message
 
 
 class AppHandler:
@@ -22,6 +24,14 @@ class AppHandler:
     def ping(self):
         # return {"ping": "pong2"}
         raise FailException(message="异常")
+
+    def check_database(self):
+        try:
+            with db.engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
+            return success_message("database connected")
+        except Exception as e:
+            return fail_message(str(e))
 
     def completion(self):
         """chat interface"""

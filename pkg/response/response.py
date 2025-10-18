@@ -21,6 +21,12 @@ class Response:
 
 
 def json(res: Response = None):
+    # response = make_response(pyjson.dumps(
+    #     res.__dict__,  # dataclass to dict
+    #     ensure_ascii=False  # disabled ASCII
+    # ))
+    # response.headers["Content-Type"] = "application/json; charset=utf-8"
+    # return response, 200
     return jsonify(res), 200
 
 
