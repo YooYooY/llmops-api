@@ -6,13 +6,13 @@
 @File: http.py
 """
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 
 from config import Config
 from internal.exception import CustomException
 from internal.model import App
 from internal.router import Router
 from pkg.response import Response, json, HttpCode
+from pkg.sqlalchemy import SQLAlchemy
 
 
 class Http(Flask):
@@ -29,9 +29,11 @@ class Http(Flask):
         super().__init__(*args, **kwargs)
 
         router.register_router(self)
+
         self.config.from_object(config)
-        # self.json.ensure_ascii = False
+        self.json.ensure_ascii = False
         self.register_error_handler(Exception, self._error_handle)
+
         db.init_app(self)
         with self.app_context():
             _ = App()

@@ -6,13 +6,13 @@
 @File: app.py
 """
 from dotenv import load_dotenv
-from flask_sqlalchemy import SQLAlchemy
 from injector import Injector
 
 from app.http.module import ExtensionModule
 from config import Config
 from internal.router import Router
 from internal.server import Http
+from pkg.sqlalchemy import SQLAlchemy
 
 injector = Injector([ExtensionModule])
 load_dotenv()

@@ -5,10 +5,10 @@
 @Author: 744534984cwl@gmail
 @File: module.py.py
 """
-from flask_sqlalchemy import SQLAlchemy
 from injector import Module, Binder
 
 from internal.extension.database_extension import db
+from pkg.sqlalchemy import SQLAlchemy
 
 
 class ExtensionModule(Module):

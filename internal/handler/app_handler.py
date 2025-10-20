@@ -80,4 +80,4 @@ class AppHandler:
 
     def delete_app(self, id: UUID):
         app = self.app_service.delete_app(id)
-        return success_message(f"app delete success, appl name: {app.name}")
+        return success_message(f"app delete success, app name: {app.name}")
