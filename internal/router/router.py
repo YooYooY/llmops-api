@@ -30,5 +30,14 @@ class Router:
         bp.add_url_rule("/check_database", view_func=self.app_handler.check_database)
         bp.add_url_rule("/app/completion", view_func=self.app_handler.completion, methods=["POST"])
 
+        bp.add_url_rule("/app", methods=["POST"], view_func=self.app_handler.create_app)
+        bp.add_url_rule("/app/<uuid:id>", view_func=self.app_handler.get_app)
+        bp.add_url_rule(
+            "/app/<uuid:id>", methods=["PUT"], view_func=self.app_handler.update_app
+        )
+        bp.add_url_rule(
+            "/app/<uuid:id>", methods=["DELETE"], view_func=self.app_handler.delete_app
+        )
+
         # 3. register the blueprint in the app
         app.register_blueprint(bp)

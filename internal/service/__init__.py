@@ -5,3 +5,6 @@
 @Author: 744534984cwl@gmail
 @File: __init__.py.py
 """
+from .app_service import AppService
+
+__all__ = ["AppService"]
