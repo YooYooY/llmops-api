@@ -6,10 +6,10 @@
 @File: http.py
 """
 from flask import Flask
+from flask_migrate import Migrate
 
 from config import Config
 from internal.exception import CustomException
-from internal.model import App
 from internal.router import Router
 from pkg.response import Response, json, HttpCode
 from pkg.sqlalchemy import SQLAlchemy
@@ -24,6 +24,7 @@ class Http(Flask):
             router: Router,
             config: Config,
             db: SQLAlchemy,
+            migrate: Migrate,
             **kwargs
     ):
         super().__init__(*args, **kwargs)
@@ -35,9 +36,7 @@ class Http(Flask):
         self.register_error_handler(Exception, self._error_handle)
 
         db.init_app(self)
-        with self.app_context():
-            _ = App()
-            db.create_all()
+        migrate.init_app(self, db, directory="internal/migration")
 
     def _error_handle(self, error: Exception):
         if isinstance(error, CustomException):
