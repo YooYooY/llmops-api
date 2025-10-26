@@ -7,12 +7,13 @@
 """
 import os
 from dataclasses import dataclass
-from typing import Any
 from uuid import UUID
 
 from flask import request
 from injector import inject
-from openai import OpenAI
+from langchain_community.chat_models import ChatOpenAI
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
 from sqlalchemy import text
 
 from internal.exception import FailException
@@ -47,22 +48,17 @@ class AppHandler:
 
         query = request.json.get("query")
 
-        client = OpenAI(
+        prompt = ChatPromptTemplate.from_template("{query}")
+
+        client = ChatOpenAI(
+            model="gpt-3.5-turbo-16k",
             api_key=os.getenv("OPENAI_API_KEY"),
             base_url=os.getenv("OPENAI_API_BASE")
         )
 
-        messages: list[Any] = [
-            {"role": "system", "content": "你是openai开发的聊天机器人"},
-            {"role": "user", "content": query}
-        ]
+        str_parser = StrOutputParser()
 
-        completion = client.chat.completions.create(
-            model="gpt-3.5-turbo-16k",
-            messages=messages,
-        )
-
-        content = completion.choices[0].message.content
+        content = str_parser.invoke(client.invoke(prompt.invoke({"query": query})))
 
         return success_json({"content": content})
 
