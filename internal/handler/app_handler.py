@@ -40,7 +40,7 @@ class AppHandler:
         except Exception as e:
             return fail_message(str(e))
 
-    def completion(self):
+    def debug(self, app_id: UUID):
         """chat interface"""
         req = CompletionReq()
         if not req.validate():
