@@ -58,7 +58,10 @@ class AppHandler:
 
         str_parser = StrOutputParser()
 
-        content = str_parser.invoke(client.invoke(prompt.invoke({"query": query})))
+        # content = str_parser.invoke(client.invoke(prompt.invoke({"query": query})))
+        chain = prompt | client | str_parser
+
+        content = chain.invoke({"query": query})
 
         return success_json({"content": content})
 
