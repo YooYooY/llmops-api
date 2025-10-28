@@ -6,6 +6,7 @@
 @File: http.py
 """
 from flask import Flask
+from flask_cors import CORS
 from flask_migrate import Migrate
 
 from config import Config
@@ -36,6 +37,21 @@ class Http(Flask):
         self.register_error_handler(Exception, self._error_handle)
 
         db.init_app(self)
+        CORS(
+            self,
+            resources={
+                r"/*": {
+                    "origins": "*",
+                    "supports_credentials": True,
+                    "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+                    "allow_headers": [
+                        "Content-Type",
+                        "Authorization",
+                        "Access-Control-Allow-Origin",
+                    ],
+                }
+            },
+        )
         migrate.init_app(self, db, directory="internal/migration")
 
     def _error_handle(self, error: Exception):
