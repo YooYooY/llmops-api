@@ -16,7 +16,6 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from sqlalchemy import text
 
-from internal.exception import FailException
 from internal.extension.database_extension import db
 from internal.schema.app_schema import CompletionReq
 from internal.service.app_service import AppService
@@ -29,8 +28,8 @@ class AppHandler:
     app_service: AppService
 
     def ping(self):
-        # return {"ping": "pong2"}
-        raise FailException(message="异常")
+        return {"ping": "pong2"}
+        # raise FailException(message="异常")
 
     def check_database(self):
         try:
@@ -51,7 +50,7 @@ class AppHandler:
         prompt = ChatPromptTemplate.from_template("{query}")
 
         client = ChatOpenAI(
-            model="gpt-3.5-turbo-16k",
+            model="gpt-3.5-turbo",
             api_key=os.getenv("OPENAI_API_KEY"),
             base_url=os.getenv("OPENAI_API_BASE")
         )
