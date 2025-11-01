@@ -5,21 +5,51 @@
 @Author: 744534984cwl@gmail
 @File: app_handler.py
 """
-import os
 from dataclasses import dataclass
 from uuid import UUID
 
 from flask import request
 from injector import inject
-from langchain_community.chat_models import ChatOpenAI
+from langchain_community.chat_message_histories import FileChatMessageHistory
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.runnables import RunnableWithMessageHistory
+from langchain_openai import ChatOpenAI
 from sqlalchemy import text
 
 from internal.extension.database_extension import db
 from internal.schema.app_schema import CompletionReq
 from internal.service.app_service import AppService
+from internal.utils import TokenLimiter
 from pkg.response import validate_error_json, success_message, fail_message, success_json
+
+MODEL_NAME = "gpt-3.5-turbo"
+MAX_TOKENS = 3000
+
+llm = ChatOpenAI(model=MODEL_NAME, streaming=True, temperature=0.6)
+limiter = TokenLimiter(model_name=MODEL_NAME, max_tokens=MAX_TOKENS)
+
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a helpful assistant who remembers past conversations."),
+    MessagesPlaceholder(variable_name="history"),
+    ("human", "{input}")
+])
+
+str_parser = StrOutputParser()
+
+chain = prompt | llm | str_parser
+
+
+def get_session_history(app_id: UUID):
+    return FileChatMessageHistory(f"./storage/memory/chat_history_{app_id}.json")
+
+
+chain_with_memory = RunnableWithMessageHistory(
+    chain,
+    get_session_history,
+    input_messages_key="input",
+    history_messages_key="history",
+)
 
 
 @inject
@@ -47,22 +77,15 @@ class AppHandler:
 
         query = request.json.get("query")
 
-        prompt = ChatPromptTemplate.from_template("{query}")
+        history = get_session_history(app_id)
+        limiter.trim(history)
 
-        client = ChatOpenAI(
-            model="gpt-3.5-turbo",
-            api_key=os.getenv("OPENAI_API_KEY"),
-            base_url=os.getenv("OPENAI_API_BASE")
+        response = chain_with_memory.invoke(
+            {"input": query},
+            config={"configurable": {"session_id": app_id}},
         )
 
-        str_parser = StrOutputParser()
-
-        # content = str_parser.invoke(client.invoke(prompt.invoke({"query": query})))
-        chain = prompt | client | str_parser
-
-        content = chain.invoke({"query": query})
-
-        return success_json({"content": content})
+        return success_json({"content": response})
 
     def create_app(self):
         app = self.app_service.create_app()
