@@ -21,3 +21,7 @@ Thumbs.db
 *.log
 internal/migration/*
 storage/memory/*
+
+embeddings
+.cache
+study/**/cache/*
