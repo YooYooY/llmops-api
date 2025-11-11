@@ -12,7 +12,7 @@ from langchain_core.messages import BaseMessage
 
 class TokenLimiter:
     """
-       Automatically detect and prune message history to prevent exceeding the model's maximum token limit
+        Automatically detect and prune message history to prevent exceeding the model's maximum token limit
     """
 
     def __init__(self, model_name: str = "gpt-3.5-tubo", max_tokens: int = 3000):
