@@ -1,7 +1,7 @@
 import ast
 import importlib.metadata
 import os
-from typing import Set, Dict
+from typing import Set
 
 EXCLUDE_DIRS = {
     "venv", "tests", "tmp", "storage", ".git",
@@ -69,52 +69,53 @@ def scan_imports() -> Set[str]:
     return imports
 
 
-def map_imports(imports: Set[str]) -> Dict[str, str]:
-    installed = {
-        dist.metadata["Name"].lower(): dist.version
-        for dist in importlib.metadata.distributions()
-    }
-
-    module_to_pkg = {}
+def build_top_level_mapping():
+    """Build mapping: module_name → package_name using top_level.txt"""
+    mapping = {}
     for dist in importlib.metadata.distributions():
+        pkg_name = dist.metadata["Name"].lower()
         top = dist.read_text("top_level.txt")
+
         if top:
-            for m in top.splitlines():
-                module_to_pkg[m.lower()] = dist.metadata["Name"].lower()
+            lines = [ln.strip().lower() for ln in top.splitlines() if ln.strip()]
+            for module in lines:
+                # Map both "_" and "-" conversions for safety
+                mapping[module] = pkg_name
+                mapping[module.replace("_", "-")] = pkg_name
+                mapping[module.replace("-", "_")] = pkg_name
 
-    mapped = {}
-    for imp in imports:
-        low = imp.lower()
+        # Also map direct package name variations
+        mapping[pkg_name] = pkg_name
+        mapping[pkg_name.replace("-", "_")] = pkg_name
+        mapping[pkg_name.replace("_", "-")] = pkg_name
 
-        if low in installed:
-            mapped[imp] = low
-        elif low in module_to_pkg:
-            mapped[imp] = module_to_pkg[low]
-
-    return mapped
+    return mapping
 
 
 def generate_requirements():
     imports = scan_imports()
-    mapped = map_imports(imports)
+    module_to_pkg = build_top_level_mapping()
 
-    installed = {
-        dist.metadata["Name"].lower(): dist.version
-        for dist in importlib.metadata.distributions()
-    }
+    installed = {dist.metadata["Name"].lower(): dist.version
+                 for dist in importlib.metadata.distributions()}
 
     reqs = []
 
     for imp in sorted(imports):
-        if imp in mapped:
-            pkg = mapped[imp]
+        low = imp.lower()
+
+        if low in module_to_pkg:
+            pkg = module_to_pkg[low]
             version = installed.get(pkg)
+
             if version:
                 req = f"{pkg}=={version}"
                 reqs.append(req)
                 log_success(f"Detected dependency: {req}")
+            else:
+                log_warn(f"Module found but package not installed: {imp}")
         else:
-            log_warn(f"Not a third-party package or missing: {imp}")
+            log_warn(f"Unknown or built-in module: {imp}")
 
     with open("requirements.txt", "w") as f:
         f.write("\n".join(sorted(reqs)))
@@ -123,6 +124,6 @@ def generate_requirements():
 
 
 if __name__ == "__main__":
-    log_info("Starting enhanced dependency generator (clean version)...")
+    log_info("Starting enhanced dependency generator (v2.2)...")
     generate_requirements()
     log_success("Done.")
