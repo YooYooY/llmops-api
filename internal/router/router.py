@@ -27,7 +27,12 @@ class Router:
 
         # 2. binding the url in the controller
         bp.add_url_rule("/ping", view_func=self.app_handler.ping)
-        bp.add_url_rule("/apps/<uuid:app_id>/debug", methods=["POST"], view_func=self.app_handler.debug)
+
+        bp.add_url_rule("/apps/chat/<uuid:app_id>/add", methods=["POST"], view_func=self.app_handler.add_doc)
+        bp.add_url_rule("/apps/chat/<uuid:app_id>/search", methods=["POST"], view_func=self.app_handler.search)
+        bp.add_url_rule("/apps/chat/<uuid:app_id>/rag_search", methods=["POST"], view_func=self.app_handler.rag_search)
+        bp.add_url_rule("/apps/chat/<uuid:app_id>/delete", methods=["DELETE"], view_func=self.app_handler.del_doc)
+
         # bp.add_url_rule("/check_database", view_func=self.app_handler.check_database)
         # bp.add_url_rule("/app/completion", view_func=self.app_handler.completion, methods=["POST"])
         #

@@ -7,5 +7,6 @@
 """
 
 from .token_limiter import TokenLimiter
+from .weaviate_store_v4 import WeaviateV4VectorStore
 
-__all__ = ["TokenLimiter"]
+__all__ = ["TokenLimiter", "WeaviateV4VectorStore"]
